@@ -1,0 +1,7 @@
+axelerant.json_controller_getPageJson:
+  path: '/page_json/{site_api_key}/{node_id}'
+  defaults:
+    _controller: '\Drupal\axelerant\Controller\JsonController::getPageJson'
+    _title: 'GetContent, this will get JSON data of a node based on site API key and node id provided in URL.'
+  requirements:
+    _permission: 'access content'

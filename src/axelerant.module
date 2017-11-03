@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * @file
+ * The module which modifies the system site information form.
+ */
+
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function axelerant_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the axelerant module.
+    case 'help.page.axelerant':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('This module is created to show my Drupal Abilities to Axelerant. I have created a custom URL in this module that exposes the Node Data in JSON format, if a Site API Key is provided with valid Node ID. Site API Key can be configured via Site Information form. That form has been altered with the addition of new text field for Site API Key.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Alters the system_site_information_settings form.
+ *
+ * @see system_site_information_settings()
+ */
+function axelerant_form_system_site_information_settings_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Getting existing values from configurations.
+  $config = \Drupal::config('axelerant.settings');
+  // Getting Site API Key.
+  $site_api_key = $config->get('site_api_key');
+
+  // Add new field called api_key.
+  $form['site_api_key'] = [
+    '#type' => 'textfield',
+    '#title' => t('Site API Key'),
+    '#description' => t('Provide API KEY.'),
+    '#default_value' => !empty($site_api_key) ? $site_api_key : t('No API Key yet'),
+    '#attributes' => [
+      'placeholder' => t('No API Key yet'),
+    ],
+  ];
+
+  // Custom submit handler for saving site_api_key.
+  $form['actions']['submit']['#submit'][] = 'axelerant_custom_submit_handler';
+
+  // Change the button value if there is an API key available.
+  if (!empty($site_api_key)) {
+    $form['actions']['submit']['#value'] = t('Update Configuration');
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_form_submit().
+ */
+function axelerant_custom_submit_handler($form, FormStateInterface $form_state) {
+  // Getting Config object for the module.
+  $config = \Drupal::configFactory()->getEditable('axelerant.settings');
+  // Getting API Key.
+  $site_api_key = $form_state->getValue('site_api_key');
+  // Save API key to configurations.
+  $config->set('site_api_key', $site_api_key)->save();
+  // Showing up the message.
+  drupal_set_message(t("Site API Key has been udpated."));
+}

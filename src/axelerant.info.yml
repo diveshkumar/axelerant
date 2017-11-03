@@ -1,0 +1,5 @@
+name: Axelerant
+description: This module will udpate site information form and create a custo url.
+core: 8.x
+package: Axelerants
+type: module
